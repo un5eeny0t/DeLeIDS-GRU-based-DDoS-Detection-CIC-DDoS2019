@@ -1,0 +1,22 @@
+# CIC-DDoS2019 Configuration
+# Binary classification: BENIGN (0) vs Attack (1)
+class_names:
+   - 'BENIGN'
+   - 'Attack'  # Includes TFTP and other DDoS attacks
+
+# Model architecture
+model_type: 'GRU'  # GRU for CIC-DDoS2019
+input_size: null  # Will be determined from data
+hidden_size: 64
+num_layers: 2
+
+# Training parameters
+batch_size: 64
+learning_rate: 0.001
+num_epochs: 10
+chunk_size: 500000  # For chunk-based processing
+
+# Data paths
+csv_file: "data/CICDdos2019/csv/01-12/TFTP.csv"
+model_path: "gru_tftp_model.pth"
+onnx_model_path: "gru_tftp_model.onnx"

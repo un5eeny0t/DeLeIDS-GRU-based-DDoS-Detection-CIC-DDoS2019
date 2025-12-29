@@ -1,0 +1,31 @@
+[project]
+name = "DeLeIDS"
+version = "0.1.0"
+description = " "
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "ipykernel>=7.1.0",
+  "jupyter>=1.1.1",
+  "kagglehub>=0.3.13",
+  "matplotlib>=3.10.8",
+  "numpy>=2.3.5",
+  "onnx>=1.20.0",
+  "onnxruntime>=1.23.2",
+  "onnxruntime-gpu>=1.23.2",
+  "onnxscript>=0.5.7",
+  "pandas>=2.3.3",
+  "scikit-learn>=1.8.0",
+  "torch>=2.9.1",
+  "torch-summary>=1.4.5",
+  "torchinfo>=1.8.0",
+  "torchmetrics==0.9.3",
+  "torchvision>=0.24.1",
+  "tqdm>=4.67.1",
+  "wandb>=0.23.1",
+]
+
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true
