@@ -15,17 +15,7 @@ csv_file = config.get('csv_file', 'data/CICDdos2019/csv/01-12/TFTP.csv')
 onnx_model_path = config.get('onnx_model_path', 'gru_tftp_model.onnx')
 batch_size = config.get('batch_size', 64)
 
-print(f"Loading test data from: {csv_file}")
-
-# Load test data from CSV (using a sample for testing)
-# In production, you'd want a separate test CSV file
-print("Loading and preprocessing test data...")
-test_df = pd.read_csv(csv_file, nrows=10000, low_memory=False)  # Load sample for testing
-test_loader = preprocess_onnx(test_df, batch_size=batch_size, scaler_save_path='scaler.pkl')
-
-print(f"Test data loaded: {len(test_df)} samples")
-
-# Load your ONNX model
+# Load ONNX model first to get expected input size
 print(f"Loading ONNX model from: {onnx_model_path}")
 onnx_session = ort.InferenceSession(onnx_model_path, providers=['CUDAExecutionProvider', 'CPUExecutionProvider'])
 
@@ -36,7 +26,23 @@ print(f"Using provider: {onnx_session.get_providers()}")
 input_name = onnx_session.get_inputs()[0].name
 output_name = onnx_session.get_outputs()[0].name
 
+# Extract expected input size from ONNX model
+# Input shape is (batch_size, sequence_length=1, input_size)
+input_shape = onnx_session.get_inputs()[0].shape
+expected_input_size = input_shape[2] if len(input_shape) > 2 else input_shape[1]
+print(f"Model expects input size: {expected_input_size}")
 print(f"Input name: {input_name}, Output name: {output_name}")
+
+print(f"\nLoading test data from: {csv_file}")
+
+# Load test data from CSV (using a sample for testing)
+# In production, you'd want a separate test CSV file
+print("Loading and preprocessing test data...")
+test_df = pd.read_csv(csv_file, nrows=10000, low_memory=False)  # Load sample for testing
+test_loader = preprocess_onnx(test_df, batch_size=batch_size, scaler_save_path='scaler.pkl', 
+                              expected_input_size=expected_input_size)
+
+print(f"Test data loaded: {len(test_df)} samples")
 
 correct = 0
 total = 0
