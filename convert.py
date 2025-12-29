@@ -17,17 +17,39 @@ csv_file = config.get('csv_file', 'data/CICDdos2019/csv/01-12/TFTP.csv')
 
 print(f"Loading model from: {model_path}")
 
-# Get input size from CSV file
-print("Determining input size from data...")
-numeric_cols = get_numeric_columns(csv_file, nrows=1000)
-input_size = len(numeric_cols)
-print(f"Input size: {input_size}")
+# Load checkpoint to extract input size
+print("Extracting model architecture from checkpoint...")
+checkpoint = torch.load(model_path, map_location=device)
 
-# Load model
+# Determine if checkpoint is a full checkpoint dict or just state_dict
+if isinstance(checkpoint, dict) and 'model_state_dict' in checkpoint:
+    # Full checkpoint with metadata
+    state_dict = checkpoint['model_state_dict']
+else:
+    # Direct state_dict
+    state_dict = checkpoint
+
+# Extract input size from GRU weights
+# GRU weight_ih_l0 shape is [hidden_size * 3, input_size]
+# For hidden_size=64, we have [192, input_size]
+if 'gru.weight_ih_l0' in state_dict:
+    gru_weight_shape = state_dict['gru.weight_ih_l0'].shape
+    input_size = gru_weight_shape[1]  # Second dimension is input_size
+    print(f"Detected input size from checkpoint: {input_size}")
+else:
+    # Fallback: try to detect from CSV
+    print("Warning: Could not extract input size from checkpoint, trying CSV...")
+    numeric_cols = get_numeric_columns(csv_file, nrows=1000)
+    input_size = len(numeric_cols)
+    print(f"Input size from CSV: {input_size}")
+
+# Load model with correct input size
 hidden_size = config.get('hidden_size', 64)
 num_layers = config.get('num_layers', 2)
 model = GRUNet(input_size, hidden_size=hidden_size, num_layers=num_layers).to(device)
-model.load_state_dict(torch.load(model_path, map_location=device))
+
+# Load state dict
+model.load_state_dict(state_dict)
 print("Model loaded successfully")
 
 print("\nExporting model to ONNX")
