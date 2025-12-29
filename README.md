@@ -212,14 +212,11 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ---
 
-## 📄 License
 
-[Add your license here]
-
----
 
 ## 🙏 Acknowledgments
 
 - [CIC-DDoS2019 Dataset](https://www.unb.ca/cic/datasets/ddos-2019.html) by Canadian Institute for Cybersecurity
 - PyTorch team
 - Weights & Biases for experiment tracking
+
